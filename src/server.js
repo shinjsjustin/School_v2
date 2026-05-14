@@ -7,8 +7,7 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
-// TODO: Import additional route files here as you build out the app:
-//   const itemRoutes = require('./routes/item');
+const chatRoutes = require('./routes/chat');
 
 const isAuth = require('./middleware/isAuth');
 
@@ -46,8 +45,7 @@ app.use('/api/auth', authRoutes);
 // ── Protected routes (JWT required via isAuth middleware) ────────────────────
 // All routes mounted after isAuth will require a valid Bearer token.
 app.use('/api/user', isAuth, userRoutes);
-// TODO: Add more protected route groups here:
-//   app.use('/api/items', isAuth, itemRoutes);
+app.use('/api/chat', isAuth, chatRoutes);
 
 // ── Serve the built React app in production ──────────────────────────────────
 // During development `npm run dev` runs the React dev server separately.

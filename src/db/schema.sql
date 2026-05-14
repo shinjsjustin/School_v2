@@ -4,6 +4,7 @@ CREATE TABLE `admin` (
   `email` varchar(255)  NOT NULL,
   `password` varchar(255) NOT NULL,
   `access_level` tinyint unsigned NOT NULL DEFAULT '0',
+  `anthropic_api_key` varchar(500) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_email` (`email`)

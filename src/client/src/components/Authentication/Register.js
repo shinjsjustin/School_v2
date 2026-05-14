@@ -7,6 +7,7 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [anthropicApiKey, setAnthropicApiKey] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -25,18 +26,15 @@ const Register = () => {
         }
 
         try {
-            // TODO: REACT_APP_URL must be set in src/client/.env
             const response = await fetch(`${process.env.REACT_APP_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password }),
+                body: JSON.stringify({ name, email, password, anthropic_api_key: anthropicApiKey || undefined }),
             });
 
             const data = await response.json();
 
             if (response.status === 201) {
-                // New accounts default to access_level 0 (pending approval).
-                // Redirect to a post-register confirmation page instead of /dashboard.
                 navigate('/post-register');
             } else if (response.status === 409) {
                 setError('An account with that email already exists.');
@@ -80,6 +78,12 @@ const Register = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
+                />
+                <input
+                    type="text"
+                    placeholder="Anthropic API Key (optional)"
+                    value={anthropicApiKey}
+                    onChange={(e) => setAnthropicApiKey(e.target.value)}
                 />
                 <button type="submit">Create Account</button>
                 <Link to="/login">Already have an account? Log in</Link>

@@ -7,10 +7,10 @@ const router = express.Router();
 
 // POST /api/auth/register
 // Creates a new admin/user account.
-// Body: { name, email, password }
+// Body: { name, email, password, anthropic_api_key? }
 // Returns 201 on success, 409 if email already exists.
 router.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, anthropic_api_key } = req.body;
 
     if (!name || !email || !password) {
         return res.status(400).json({ error: 'name, email, and password are required' });
@@ -18,7 +18,6 @@ router.post('/register', async (req, res) => {
 
     try {
         // Check for existing account
-        // TODO: Replace "admin" with your actual users table name
         const [rows] = await db.execute('SELECT id FROM admin WHERE email = ?', [email]);
 
         if (rows.length > 0) {
@@ -27,11 +26,9 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // TODO: Adjust columns to match your schema.
-        //   access_level: new registrations default to 1 (approved).
         const [result] = await db.execute(
-            `INSERT INTO admin (name, email, password, access_level) VALUES (?, ?, ?, ?)`,
-            [name, email, hashedPassword, 1]
+            `INSERT INTO admin (name, email, password, access_level, anthropic_api_key) VALUES (?, ?, ?, ?, ?)`,
+            [name, email, hashedPassword, 1, anthropic_api_key || null]
         );
 
         res.status(201).json({ id: result.insertId, name, email });

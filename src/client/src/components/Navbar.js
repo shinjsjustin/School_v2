@@ -1,58 +1,111 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './Styling/Navbar.css';
-import './Styling/Home.css';
+import {jwtDecode} from 'jwt-decode'
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import profileicon from '../profile-icon.svg'
+import './Styling/Navbar.css'
+import './Styling/Home.css'
 
-// Navbar renders the top-right profile icon and a slide-down panel with
-// account links and a logout button. Add global nav links here if needed.
+import Logout from './Authentication/Logout';
+
 const Navbar = () => {
-    const [showPanel, setShowPanel] = useState(false);
-    const navigate = useNavigate();
+    const [authorized, setAuthorized] = useState(false);
+    const [openPanel, setOpenPanel] = useState(false);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        navigate('/login');
+    const navigate = useNavigate();
+    const location = useLocation();
+    const token = localStorage.getItem('token');
+    const decodedToken = token ? jwtDecode(token) : null;
+    const accessLevel = decodedToken?.access || 0;
+
+    const adminButtonConfig = [
+        { label: 'Dashboard', path: '/dashboard', minAccess: 1 },
+        { label: 'Atrium',    path: '/atrium',    minAccess: 1 },
+        { label: 'Chat Room', path: '/chat',      minAccess: 1 },
+    ];
+
+    useEffect(() => {
+        // Check for token in URL parameters (from OAuth redirect)
+        const urlParams = new URLSearchParams(location.search);
+        const tokenFromUrl = urlParams.get('token');
+        
+        if (tokenFromUrl) {
+            localStorage.setItem('token', tokenFromUrl);
+            // Remove token from URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            window.location.reload(); // Refresh to update state
+        }
+
+        const currentToken = localStorage.getItem('token');
+        if (currentToken) {
+            try {
+                const decoded = jwtDecode(currentToken);
+                const currentTime = Math.floor(Date.now() / 1000);
+                if (decoded.exp && decoded.exp > currentTime) {
+                    setAuthorized(true);
+                } else {
+                    localStorage.removeItem('token');
+                    setAuthorized(false);
+                }
+            } catch (error) {
+                console.error('Invalid token:', error);
+                localStorage.removeItem('token');
+                setAuthorized(false);
+            }
+        }
+    }, [location, token]);
+
+    const profileClick = () => {
+        if (!authorized) {
+            navigate("/login-admin");
+        } else {
+            setOpenPanel(!openPanel)
+        }
+    }
+
+    const navigateTo = (path) => {
+        if (!authorized) {
+            navigate('/login-admin');
+        } else {
+            navigate(path);
+        }
     };
 
-    const token = localStorage.getItem('token');
-
     return (
-        <>
-            {token && (
-                <div
-                    className="profile-icon"
-                    onClick={() => setShowPanel(prev => !prev)}
-                    title="Account"
-                >
-                    {/* TODO: Replace with your logo/profile SVG or an <img> */}
-                    <svg viewBox="0 0 45.532 45.532" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-                        <path d="M22.766 0C10.194 0 0 10.193 0 22.766s10.193 22.766 22.766 22.766
-                            c12.574 0 22.766-10.192 22.766-22.766S35.34 0 22.766 0zm0 6.808
-                            a7.53 7.53 0 1 1 0 15.06 7.53 7.53 0 0 1 0-15.06zm-.005 32.771
-                            c-4.149 0-7.949-1.511-10.88-4.012a2.999 2.999 0 0 1-1.126-2.439
-                            c0-4.217 3.413-7.592 7.631-7.592h8.762c4.219 0 7.619 3.375 7.619 7.592
-                            a3 3 0 0 1-1.125 2.438c-2.931 2.501-6.732 4.013-10.881 4.013z"/>
-                    </svg>
-                </div>
-            )}
-
-            {showPanel && token && (
-                <div className="profile-background">
-                    <div className="profile-panel">
-                        {/* TODO: Add user name/email from decoded JWT if desired */}
-                        <button
-                            className="industrial-button"
-                            onClick={() => { navigate('/dashboard'); setShowPanel(false); }}
-                        >
-                            Dashboard
-                        </button>
-                        <button className="industrial-button" onClick={handleLogout}>
-                            Logout
-                        </button>
+        <div>
+            <div className="profile-icon">
+                <img 
+                    src={profileicon} 
+                    alt="User Profile" 
+                    onClick={profileClick} 
+                />
+                {openPanel && (
+                    <div className='profile-background'>
+                        <div className='profile-panel'>
+                            {adminButtonConfig
+                                .filter(({ minAccess, maxAccess }) => 
+                                    accessLevel >= minAccess && 
+                                    (maxAccess === undefined || accessLevel <= maxAccess)
+                                )
+                                .map(({ label, path }) => (
+                                    <button 
+                                        key={label} 
+                                        className='industrial-button' 
+                                        onClick={() => {
+                                            setOpenPanel(false);
+                                            navigateTo(path);
+                                        }}
+                                    >
+                                        {label}
+                                    </button>
+                                ))
+                            }
+                            
+                            <Logout />
+                        </div>
                     </div>
-                </div>
-            )}
-        </>
+                )}
+            </div>
+        </div>
     );
 };
 

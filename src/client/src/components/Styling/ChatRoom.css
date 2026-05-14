@@ -1,0 +1,121 @@
+/* ─── ChatRoom Layout ─────────────────────────────────────────────────────── */
+.chatroom {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-md);
+    box-sizing: border-box;
+}
+
+.chatroom-title {
+    color: var(--text-white);
+    font-size: var(--font-xl);
+    font-weight: 600;
+    margin: 0 0 var(--space-md) 0;
+    text-align: center;
+}
+
+/* ─── Message List ───────────────────────────────────────────────────────── */
+.chatroom-messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--space-md);
+}
+
+.chatroom-bubble {
+    max-width: 70%;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-md);
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.chatroom-bubble--user {
+    align-self: flex-end;
+    background-color: var(--color-primary);
+    color: var(--text-white);
+    border-bottom-right-radius: var(--radius-sm);
+}
+
+.chatroom-bubble--assistant {
+    align-self: flex-start;
+    background-color: var(--bg-alt);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: var(--radius-sm);
+}
+
+.chatroom-bubble--streaming::after {
+    content: '▋';
+    display: inline-block;
+    animation: blink 0.8s step-start infinite;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* ─── Input Bar ──────────────────────────────────────────────────────────── */
+.chatroom-input-bar {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.chatroom-input {
+    flex: 1;
+    padding: 12px var(--space-md);
+    font-size: var(--font-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    resize: none;
+    font-family: var(--font-family);
+    line-height: 1.4;
+}
+
+.chatroom-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.chatroom-send {
+    padding: 12px var(--space-lg);
+    background-color: var(--color-primary);
+    color: var(--text-white);
+    font-size: var(--font-md);
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.chatroom-send:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+}
+
+.chatroom-send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chatroom-error {
+    color: var(--color-danger);
+    font-size: var(--font-base);
+    text-align: center;
+    margin-top: var(--space-sm);
+}

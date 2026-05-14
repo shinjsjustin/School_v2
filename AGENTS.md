@@ -134,26 +134,6 @@ shop-template/
 
 ---
 
-## TODO Placeholders
-
-| File | Placeholder | What to fill in |
-|------|------------|-----------------|
-| `.env.example` | `DB_HOST/USER/PASSWORD/NAME` | Your MySQL connection details |
-| `.env.example` | `JWT_SECRET` | Strong random string (≥32 chars) |
-| `.env.example` | `SESSION_SECRET` | Strong random string (≥32 chars) |
-| `src/client/.env.example` | `REACT_APP_URL` | Your API base URL |
-| `src/db/db.js` | env var comments | Filled by `.env` — no code change needed |
-| `src/routes/auth.js` | `admin` table name | Replace with your actual users table |
-| `src/routes/auth.js` | JWT payload fields | Add/remove to match your user schema |
-| `src/routes/user.js` | `admin` table name + columns | Match your schema |
-| `src/server.js` | route imports | Add new route files as you build features |
-| `src/client/src/components/Home.js` | Logo, tagline, CTAs | Brand assets |
-| `src/client/src/components/Navbar.js` | SVG icon, nav links | Your profile icon and navigation |
-| `src/client/src/components/Dashboard/Dashboard.js` | Quick links section | Real feature pages |
-| `src/client/src/index.css` | `--color-primary` etc. | Your brand color palette |
-
----
-
 ## CSS Variable System
 
 All design tokens live in `:root` in `src/client/src/index.css`. Component CSS
@@ -188,24 +168,3 @@ values in component CSS — always reference a variable.
 - **Error handling** — handle every HTTP status code explicitly; never silently swallow errors
 - **Immutability** — use spread `{ ...obj, field: value }` for state updates; never mutate state directly
 - **No console.log in production** — remove debug logs before committing
-
----
-
-## Quick Start
-
-```bash
-# 1. Copy env files and fill in TODOs
-cp .env.example .env
-cp src/client/.env.example src/client/.env
-
-# 2. Install server deps
-npm install
-
-# 3. Install client deps
-npm install --prefix src/client
-
-# 4. Run both in parallel (requires concurrently)
-npm run dev
-#   server → http://localhost:3001
-#   client → http://localhost:3000
-```
