@@ -12,10 +12,10 @@ const PostRegisterPage = () => {
             {/* TODO: Update this message to match your approval flow */}
             <p>Your account has been created. Please wait for an administrator to grant you access.</p>
             <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/login')}
                 style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}
             >
-                Go to Home
+                Go to Login
             </button>
         </div>
     );

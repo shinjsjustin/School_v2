@@ -25,7 +25,7 @@ const Login = () => {
 
             if (response.status === 200) {
                 localStorage.setItem('token', data.token);
-                navigate('/dashboard');
+                navigate('/atrium');
             } else if (response.status === 404) {
                 setError('No account found with that email.');
             } else if (response.status === 400) {
@@ -59,7 +59,6 @@ const Login = () => {
                 />
                 <button type="submit">Log In</button>
                 <Link to="/register">Don't have an account? Register</Link>
-                <Link to="/">Home</Link>
             </form>
             {error && <p>{error}</p>}
         </div>

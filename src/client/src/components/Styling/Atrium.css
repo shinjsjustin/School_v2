@@ -123,7 +123,42 @@
   display: grid; place-items: center;
   font-family: var(--serif); font-weight: 600; font-size: 12px;
   color: var(--ink-2);
+  flex-shrink: 0;
 }
+/* Avatar + logout button wrapper — expands on hover */
+.atrium-screen .hdr-avatar-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  transition: border-color .2s ease, background .2s ease;
+  cursor: default;
+  overflow: hidden;
+}
+.atrium-screen .hdr-avatar-wrap:hover {
+  background: var(--bg-2);
+  border-color: var(--rule-2);
+}
+.atrium-screen .hdr-logout-btn {
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+  transition: max-width .25s ease, padding .25s ease, color .15s ease;
+}
+.atrium-screen .hdr-avatar-wrap:hover .hdr-logout-btn {
+  max-width: 80px;
+  padding: 0 10px 0 6px;
+}
+.atrium-screen .hdr-logout-btn:hover { color: var(--ink); }
 .atrium-screen .hdr-pill {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 5px 10px 5px 8px;
@@ -284,10 +319,15 @@
 .atrium-screen .folder-svg { display: block; overflow: visible; }
 .atrium-screen .folder-lid {
   transform-origin: 100px 40px;
-  transition: transform .35s cubic-bezier(.2,.7,.3,1);
+}
+@keyframes folderLidSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 .atrium-screen .folder-wrap:hover .folder { transform: translateY(-4px); }
-.atrium-screen .folder-wrap:hover .folder-lid { transform: rotate(-9deg) translateY(-1px); }
+.atrium-screen .folder-wrap:hover .folder-lid {
+  animation: folderLidSpin 0.5s linear infinite;
+}
 .atrium-screen .folder-meta { display: flex; flex-direction: column; gap: 6px; }
 .atrium-screen .folder-name {
   font-family: var(--serif);
@@ -520,6 +560,13 @@
   box-shadow: 0 0 0 4px rgba(155,63,44,0.15);
 }
 .atrium-screen .lo-item.todo .lo-text { color: var(--ink-2); }
+.atrium-screen .lo-empty {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-3);
+  font-style: italic;
+  margin: 8px 0 0;
+}
 .atrium-screen .lo-foot {
   margin-top: auto;
   padding-top: 20px;
@@ -579,6 +626,39 @@
   flex-direction: column;
   gap: 14px;
   min-height: 0;
+  position: relative;
+}
+.atrium-screen .chat-start-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(2px);
+  z-index: 5;
+  padding: 24px;
+}
+.atrium-screen .chat-start-card {
+  max-width: 440px;
+  text-align: center;
+  background: var(--bg-2, var(--bg));
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 28px 28px 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+.atrium-screen .chat-start-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 22px;
+  margin: 8px 0 10px;
+  line-height: 1.25;
+}
+.atrium-screen .chat-start-sub {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin: 0 0 18px;
+  line-height: 1.55;
 }
 .atrium-screen .chat-day {
   align-self: center;
@@ -1071,3 +1151,92 @@
   color: var(--accent);
   font-weight: 600;
 }
+
+/* ── Test generation spinner + grading overlay ─────────────────────────── */
+.atrium-screen .spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: atrium-spin 0.7s linear infinite;
+  margin-right: 6px;
+  vertical-align: -2px;
+}
+@keyframes atrium-spin {
+  to { transform: rotate(360deg); }
+}
+.atrium-screen .btn[disabled] { opacity: 0.7; cursor: progress; }
+
+/* Grader summary banner above the test grid. */
+.atrium-screen .grade-banner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 20px;
+  margin: 0 0 16px 0;
+}
+.atrium-screen .grade-banner-l {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 80px;
+}
+.atrium-screen .grade-score {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+}
+.atrium-screen .grade-banner-r {
+  flex: 1;
+}
+.atrium-screen .grade-banner-r p {
+  margin: 4px 0 0 0;
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Per-question pill in the question header. */
+.atrium-screen .grade-pill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+.atrium-screen .grade-pill-correct {
+  background: rgba(34, 197, 94, 0.15);
+  color: rgb(22, 163, 74);
+}
+.atrium-screen .grade-pill-incorrect {
+  background: rgba(239, 68, 68, 0.15);
+  color: rgb(220, 38, 38);
+}
+
+/* Grader feedback block under the response textarea. */
+.atrium-screen .qgrade {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--bg-2);
+  border-radius: 8px;
+  border-left: 2px solid var(--accent);
+}
+.atrium-screen .qgrade p {
+  margin: 4px 0 0 0;
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Sidebar row colouring after grading. */
+.atrium-screen .qrow-correct .qrow-mark { color: rgb(22, 163, 74); }
+.atrium-screen .qrow-incorrect .qrow-mark { color: rgb(220, 38, 38); }
+.atrium-screen .qrow-correct { border-left: 2px solid rgb(22, 163, 74); }
+.atrium-screen .qrow-incorrect { border-left: 2px solid rgb(220, 38, 38); }
+.atrium-screen .dot.dot-correct { background: rgb(22, 163, 74); }
+.atrium-screen .dot.dot-incorrect { background: rgb(220, 38, 38); }

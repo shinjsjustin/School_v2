@@ -8,6 +8,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const chatRoutes = require('./routes/chat');
+const atriumRoutes = require('./routes/atrium');
 
 const isAuth = require('./middleware/isAuth');
 
@@ -46,6 +47,7 @@ app.use('/api/auth', authRoutes);
 // All routes mounted after isAuth will require a valid Bearer token.
 app.use('/api/user', isAuth, userRoutes);
 app.use('/api/chat', isAuth, chatRoutes);
+app.use('/api/atrium', isAuth, atriumRoutes);
 
 // ── Serve the built React app in production ──────────────────────────────────
 // During development `npm run dev` runs the React dev server separately.

@@ -1,29 +1,118 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chevron } from './parts/Icons';
-import { ROADMAP_CHAT, ROADMAP_DRAFT } from './data/mockData';
+import {
+    fetchRoadmapDraft,
+    submitRoadmapDraft,
+    updateRoadmapDraft,
+    roadmapStreamUrl,
+} from './data/api';
+import { useChatStream } from '../ChatRoom/useChatStream';
 import '../Styling/Atrium.css';
 
-// Roadmap screen — user describes what they want to learn, AI proposes a
-// roadmap, user edits it inline before submitting.
-//
-// TODO (data): on first load, GET the in-progress draft (if any) for the user.
-//   GET  ${REACT_APP_URL}/atrium/roadmap/draft
-// TODO (chat): POST chat messages to the planner.
-//   POST ${REACT_APP_URL}/atrium/roadmap/chat       body: { message }
-// TODO (regen): POST to regenerate the roadmap from the current chat.
-//   POST ${REACT_APP_URL}/atrium/roadmap/regenerate
-// TODO (submit): POST the final roadmap to spin up the school, then navigate
-//   POST ${REACT_APP_URL}/atrium/schools             body: { title, subtitle, sections }
+// Map a server-shaped chat row ({ who, text }) into the hook's role/content
+// shape so the streaming hook and the rest of the UI agree on history.
+const fromServerMsg = (m) => ({
+    role: m.who === 'tutor' ? 'assistant' : 'user',
+    content: m.text || '',
+    pin_label: m.pin_label || null,
+});
+
+const EMPTY_DRAFT = { title: '', subtitle: '', sections: [] };
+
+const WELCOME_MESSAGE = `Hi! I'm Magister. Before I build your roadmap, I have five quick questions:
+
+1. What is the topic you want to learn?
+2. What is your current background with this topic?
+3. What is your goal — deep mastery, working knowledge, or something specific?
+4. Are there any sub-areas you especially want to cover or skip?
+5. How much depth do you want per module — broad survey or deep dive?
+
+Answer as many or as few as you like. Even a short reply is enough for me to propose a first draft roadmap right away.`;
+
+// Roadmap screen — user describes what they want to learn, the planner
+// proposes a roadmap (via streamline calls) and the user submits it.
 const AtriumRoadmap = () => {
     const navigate = useNavigate();
+    const [draftId, setDraftId] = useState(null);
+    const [draft, setDraft] = useState(EMPTY_DRAFT);
+    const [submitting, setSubmitting] = useState(false);
 
-    const totalTopics = ROADMAP_DRAFT.sections.reduce((sum, s) => sum + s.topics.length, 0);
+    // Streamline handler — fired automatically when the planner emits a
+    // [[CALL:propose_roadmap]]…[[/CALL]] block. Updates both local state and
+    // the persisted draft so a refresh keeps the latest shape.
+    const onProposeRoadmap = async (payload) => {
+        if (!payload || typeof payload !== 'object') return;
+        const next = {
+            title: payload.title || draft.title,
+            subtitle: payload.subtitle || '',
+            sections: Array.isArray(payload.sections)
+                ? payload.sections.map((s) => ({
+                    name: String(s.name || '').trim(),
+                    highlight: !!s.highlight,
+                    topics: Array.isArray(s.topics) ? s.topics.map(String) : [],
+                }))
+                : [],
+        };
+        setDraft(next);
+        if (draftId) {
+            await updateRoadmapDraft(draftId, next);
+        }
+    };
 
-    const handleCreate = () => {
-        // TODO: POST the (possibly edited) roadmap, then navigate to the new
-        // school's page using the returned id.
-        navigate('/atrium');
+    const {
+        messages,
+        setMessages,
+        input,
+        setInput,
+        isStreaming,
+        error,
+        sendMessage,
+    } = useChatStream({
+        endpoint: draftId ? roadmapStreamUrl(draftId) : '',
+        streamlineHandlers: { propose_roadmap: onProposeRoadmap },
+        initialMessages: [],
+    });
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchRoadmapDraft().then((r) => {
+            if (cancelled || !r.ok || !r.data) return;
+            setDraftId(r.data.draftId);
+            if (r.data.sections?.length) {
+                setDraft({
+                    title: r.data.title,
+                    subtitle: r.data.subtitle,
+                    sections: r.data.sections,
+                });
+            }
+            if (r.data.chat?.length) {
+                setMessages(r.data.chat.map(fromServerMsg));
+            } else {
+                setMessages([{ role: 'assistant', content: WELCOME_MESSAGE }]);
+            }
+        });
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const totalTopics = draft.sections.reduce((sum, s) => sum + s.topics.length, 0);
+
+    const handleSend = (e) => {
+        e?.preventDefault?.();
+        if (!draftId) return;
+        sendMessage();
+    };
+
+    const handleCreate = async () => {
+        if (!draftId || submitting) return navigate('/atrium');
+        setSubmitting(true);
+        // Make sure the draft on disk matches what's on screen before promoting.
+        await updateRoadmapDraft(draftId, draft);
+        const r = await submitRoadmapDraft(draftId);
+        setSubmitting(false);
+        if (r.ok && r.data?.id) navigate(`/atrium/school/${r.data.id}`);
+        else navigate('/atrium');
     };
 
     return (
@@ -49,28 +138,26 @@ const AtriumRoadmap = () => {
                         <div>
                             <div className="tag">Proposed roadmap</div>
                             <div className="rmap-meta mono">
-                                {String(ROADMAP_DRAFT.sections.length).padStart(2, '0')} sections · {String(totalTopics).padStart(2, '0')} topics · ~6 weeks
+                                {String(draft.sections.length).padStart(2, '0')} sections · {String(totalTopics).padStart(2, '0')} topics · ~6 weeks
                             </div>
                         </div>
-                        {/* TODO: regenerate handler */}
                         <button className="btn ghost tiny">↻ Regenerate</button>
                     </div>
 
                     <div className="rmap-body">
                         <div className="rmap-school" contentEditable suppressContentEditableWarning>
-                            <div className="rmap-school-name">{ROADMAP_DRAFT.title}</div>
-                            <div className="rmap-school-sub">{ROADMAP_DRAFT.subtitle}</div>
+                            <div className="rmap-school-name">{draft.title}</div>
+                            <div className="rmap-school-sub">{draft.subtitle}</div>
                         </div>
 
                         <ol className="rmap-sections">
-                            {ROADMAP_DRAFT.sections.map((s, i) => (
-                                <li key={s.name} className={`rmap-section ${s.highlight ? 'highlight' : ''}`}>
+                            {draft.sections.map((s, i) => (
+                                <li key={s.name + i} className={`rmap-section ${s.highlight ? 'highlight' : ''}`}>
                                     <div className="rmap-section-head">
                                         <span className="rmap-section-idx mono">§ {String(i + 1).padStart(2, '0')}</span>
                                         <span className="rmap-section-name" contentEditable suppressContentEditableWarning>
                                             {s.name}
                                         </span>
-                                        {/* TODO: remove-section handler */}
                                         <button className="rmap-x" title="Remove section">×</button>
                                     </div>
                                     <ul className="rmap-topics">
@@ -80,11 +167,9 @@ const AtriumRoadmap = () => {
                                                 <span className="rmap-topic-text" contentEditable suppressContentEditableWarning>
                                                     {t}
                                                 </span>
-                                                {/* TODO: remove-topic handler */}
                                                 <button className="rmap-x rmap-x-sm" title="Remove topic">×</button>
                                             </li>
                                         ))}
-                                        {/* TODO: add-topic handler */}
                                         <li className="rmap-add">
                                             <span className="rmap-topic-mark">+</span>
                                             <span className="rmap-add-text">Add topic</span>
@@ -92,7 +177,6 @@ const AtriumRoadmap = () => {
                                     </ul>
                                 </li>
                             ))}
-                            {/* TODO: add-section handler */}
                             <li className="rmap-add-section">
                                 <span style={{ fontFamily: 'var(--mono)', color: 'var(--ink-3)' }}>+</span>
                                 <span>Add section</span>
@@ -104,8 +188,8 @@ const AtriumRoadmap = () => {
                         <div className="rmap-foot-meta">
                             <span className="tick">Edit anything inline. Drag to reorder.</span>
                         </div>
-                        <button className="btn primary rmap-submit" onClick={handleCreate}>
-                            Create school
+                        <button className="btn primary rmap-submit" onClick={handleCreate} disabled={submitting}>
+                            {submitting ? 'Creating…' : 'Create school'}
                             <span style={{ marginLeft: 8, fontFamily: 'var(--mono)', fontSize: 11, opacity: 0.7 }}>→</span>
                         </button>
                     </div>
@@ -125,56 +209,61 @@ const AtriumRoadmap = () => {
                             </div>
                         </div>
                         <div className="chat-actions">
-                            {/* TODO: start-over handler — clear chat + draft */}
                             <button className="btn ghost tiny">Start over</button>
                         </div>
                     </div>
 
                     <div className="chat-body">
                         <div className="chat-day">Today · 11:02 am</div>
-                        {ROADMAP_CHAT.map((m, i) => (
-                            <div key={i} className={`msg msg-${m.who}`}>
-                                {m.who === 'tutor' && <div className="msg-av">M</div>}
-                                <div className="msg-bubble">
-                                    <p>{m.text}</p>
-                                    {i === 2 && (
-                                        <div className="msg-pin">
-                                            <span className="tick">↖ Proposed</span>
-                                            Roman History · 4 sections, 15 topics
-                                        </div>
-                                    )}
+                        {messages.map((m, i) => {
+                            const who = m.role === 'assistant' ? 'tutor' : 'me';
+                            return (
+                                <div key={i} className={`msg msg-${who}`}>
+                                    {who === 'tutor' && <div className="msg-av">M</div>}
+                                    <div className="msg-bubble">
+                                        <p>{m.content}</p>
+                                        {m.pin_label && (
+                                            <div className="msg-pin">
+                                                <span className="tick">↖ Proposed</span>
+                                                {m.pin_label}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {isStreaming && messages[messages.length - 1]?.content === '' && (
+                            <div className="msg msg-tutor">
+                                <div className="msg-av">M</div>
+                                <div className="msg-bubble typing">
+                                    <span></span><span></span><span></span>
                                 </div>
                             </div>
-                        ))}
-                        {/* TODO: typing indicator only while awaiting tutor */}
-                        <div className="msg msg-tutor">
-                            <div className="msg-av">M</div>
-                            <div className="msg-bubble typing">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
+                        )}
+                        {error && <p style={{ color: 'var(--color-danger, #c00)', fontSize: 12 }}>{error}</p>}
                     </div>
 
-                    <div className="chat-input">
+                    <form className="chat-input" onSubmit={handleSend}>
                         <div className="chat-input-bar">
-                            {/* TODO: controlled state + send handler */}
                             <textarea
                                 placeholder="Reply or ask the tutor to expand a section…"
                                 rows={2}
-                                defaultValue=""
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                disabled={isStreaming}
                             />
                             <div className="chat-input-row">
                                 <div className="chat-input-tools">
-                                    <button className="btn ghost tiny">+ Pin source</button>
-                                    <button className="btn ghost tiny">⤴ Upload syllabus</button>
+                                    <button type="button" className="btn ghost tiny">+ Pin source</button>
+                                    <button type="button" className="btn ghost tiny">⤴ Upload syllabus</button>
                                 </div>
-                                <button className="btn primary">
+                                <button type="submit" className="btn primary" disabled={isStreaming || !input.trim() || !draftId}>
                                     Send
                                     <span style={{ opacity: .6, fontFamily: 'var(--mono)', fontSize: 11, marginLeft: 6 }}>↵</span>
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </section>
             </div>
         </div>

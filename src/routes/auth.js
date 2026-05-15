@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
         // TODO: JWT_SECRET must be set in .env
         // TODO: Add/remove JWT payload fields to match your user schema
         const token = jwt.sign(
-            { email: user.email, id: user.id, access: user.access_level },
+            { email: user.email, id: user.id, access: user.access_level, name: user.name },
             process.env.JWT_SECRET,
             { expiresIn: '8h' }
         );

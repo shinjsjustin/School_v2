@@ -1,14 +1,39 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import { Ring, Chevron, Monogram } from './Icons';
 
 // Header variants for each Atrium screen. They share the same layout primitives
 // but vary the center "breadcrumb" and the right-hand widget.
 
-export const HeaderDashboard = ({ userName = 'Marcus', dateLabel = 'TUE · MAY 13' }) => {
+const getUserName = () => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) return 'User';
+        const decoded = jwtDecode(token);
+        return decoded.name || decoded.email?.split('@')[0] || 'User';
+    } catch {
+        return 'User';
+    }
+};
+
+const getDateLabel = () => {
+    const d = new Date();
+    const day = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+    const mon = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    return `${day} · ${mon} ${d.getDate()}`;
+};
+
+export const HeaderDashboard = () => {
     const navigate = useNavigate();
-    // TODO: Pull `userName` from the decoded JWT (jwtDecode(localStorage.getItem('token')))
-    // TODO: Compute `dateLabel` from new Date() formatted in user's locale.
+    const userName = getUserName();
+    const dateLabel = getDateLabel();
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/');
+    };
+
     return (
         <header className="hdr">
             <div className="hdr-left">
@@ -22,7 +47,10 @@ export const HeaderDashboard = ({ userName = 'Marcus', dateLabel = 'TUE · MAY 1
             </div>
             <div className="hdr-right">
                 <span className="tick">{dateLabel}</span>
-                <div className="hdr-avatar">{userName.charAt(0)}</div>
+                <div className="hdr-avatar-wrap">
+                    <div className="hdr-avatar">{userName.charAt(0).toUpperCase()}</div>
+                    <button className="hdr-logout-btn" onClick={handleLogout}>Logout</button>
+                </div>
             </div>
         </header>
     );
