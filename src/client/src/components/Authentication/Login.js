@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import '../Styling/Form.css';
+import { Monogram } from '../Atrium/parts/Icons';
+import '../Styling/Atrium.css';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -13,8 +14,6 @@ const Login = () => {
         setError('');
 
         try {
-            // TODO: REACT_APP_URL must be set in src/client/.env
-            //   e.g. REACT_APP_URL=http://localhost:3001/api
             const response = await fetch(`${process.env.REACT_APP_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -34,33 +33,46 @@ const Login = () => {
                 setError('Server error — please try again.');
             }
         } catch (err) {
-            console.error(err);
             setError('Network error — could not reach the server.');
         }
     };
 
     return (
-        <div className="container">
-            <h1 className="header">Log In</h1>
-            <form className="container-form" onSubmit={handleLogin}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Log In</button>
-                <Link to="/register">Don't have an account? Register</Link>
-            </form>
-            {error && <p>{error}</p>}
+        <div className="atrium-screen">
+            <header className="hdr">
+                <div className="hdr-left">
+                    <Monogram onClick={() => navigate('/')} />
+                    <div className="hdr-brand">Atrium</div>
+                </div>
+            </header>
+            <div className="auth-body">
+                <div className="auth-card card">
+                    <div className="tag">Account</div>
+                    <h1 className="auth-title">Welcome back.</h1>
+                    <p className="auth-sub">Sign in to continue learning.</p>
+                    <form className="auth-form" onSubmit={handleLogin}>
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <button className="btn primary" type="submit">Log In</button>
+                    </form>
+                    {error && <p className="auth-error">{error}</p>}
+                    <div className="auth-links">
+                        <Link to="/register">Don't have an account? Register</Link>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

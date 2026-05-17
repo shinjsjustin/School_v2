@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#221b13"></rect>
+  
+  <path d="M 10 22 L 24 22 L 27 17 L 54 17 L 54 50 L 10 50 Z" fill="#c8965f" stroke="#faf8f3" stroke-width="1.5" stroke-linejoin="round"></path>
+  
+  <path d="M 10 26 L 54 26 L 54 50 L 10 50 Z" fill="#d4a574" stroke="#faf8f3" stroke-width="1.5" stroke-linejoin="round"></path>
+  
+  <text x="32" y="46" font-family="&#39;Source Serif 4&#39;, &#39;Iowan Old Style&#39;, Georgia, serif" font-size="22" font-weight="700" text-anchor="middle" fill="#221b13" letter-spacing="-0.02em">A</text>
+</svg>

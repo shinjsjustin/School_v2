@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import '../Styling/Form.css';
+import { Monogram } from '../Atrium/parts/Icons';
+import '../Styling/Atrium.css';
 
 const Register = () => {
     const [name, setName] = useState('');
@@ -42,54 +43,67 @@ const Register = () => {
                 setError(data.error || 'Server error — please try again.');
             }
         } catch (err) {
-            console.error(err);
             setError('Network error — could not reach the server.');
         }
     };
 
     return (
-        <div className="container">
-            <h1 className="header">Register</h1>
-            <form className="container-form" onSubmit={handleRegister}>
-                <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                />
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password (min 8 characters)"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Anthropic API Key (optional)"
-                    value={anthropicApiKey}
-                    onChange={(e) => setAnthropicApiKey(e.target.value)}
-                />
-                <button type="submit">Create Account</button>
-                <Link to="/login">Already have an account? Log in</Link>
-                <Link to="/">Home</Link>
-            </form>
-            {error && <p>{error}</p>}
+        <div className="atrium-screen">
+            <header className="hdr">
+                <div className="hdr-left">
+                    <Monogram onClick={() => navigate('/')} />
+                    <div className="hdr-brand">Atrium</div>
+                </div>
+            </header>
+            <div className="auth-body">
+                <div className="auth-card card">
+                    <div className="tag">New account</div>
+                    <h1 className="auth-title">Create account.</h1>
+                    <p className="auth-sub">Join to start your learning journey.</p>
+                    <form className="auth-form" onSubmit={handleRegister}>
+                        <input
+                            type="text"
+                            placeholder="Full Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password (min 8 characters)"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="password"
+                            placeholder="Confirm Password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="text"
+                            placeholder="Anthropic API Key (optional)"
+                            value={anthropicApiKey}
+                            onChange={(e) => setAnthropicApiKey(e.target.value)}
+                        />
+                        <button className="btn primary" type="submit">Create Account</button>
+                    </form>
+                    {error && <p className="auth-error">{error}</p>}
+                    <div className="auth-links">
+                        <Link to="/login">Already have an account? Log in</Link>
+                        <Link to="/">Back to home</Link>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
