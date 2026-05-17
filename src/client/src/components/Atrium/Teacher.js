@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { HeaderTeacher } from './parts/Headers';
+import { SubTab } from './parts/SubTab';
 import { Check } from './parts/Icons';
 import { fetchTopic, teacherStreamUrl, teacherObjectivesGenerateUrl, teacherEndSessionUrl, teacherHintUrl, updateObjective, addTopicNote } from './data/api';
 import { useChatStream } from '../ChatRoom/useChatStream';
@@ -34,6 +35,8 @@ const AtriumTeacher = () => {
     const [notes, setNotes] = useState([]);
     const [generatingObjectives, setGeneratingObjectives] = useState(false);
     const [generationError, setGenerationError] = useState('');
+    // Mobile-only: 'left' = objectives, 'right' = tutor chat.
+    const [mobilePane, setMobilePane] = useState('left');
 
     // Persist any objective state changes the model proposes. Mutates local
     // state optimistically so the LO list reflects the change immediately.
@@ -223,7 +226,13 @@ const AtriumTeacher = () => {
                 topic={topic.topic}
                 progress={topic.progress}
             />
-            <div className="teach">
+            <SubTab
+                left="Goals"
+                right="Tutor chat"
+                active={mobilePane}
+                onChange={setMobilePane}
+            />
+            <div className="teach" data-pane={mobilePane}>
                 {/* Learning objectives — 33% */}
                 <aside className="lo">
                     <div className="lo-head">

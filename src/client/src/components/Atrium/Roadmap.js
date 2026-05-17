@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chevron } from './parts/Icons';
+import { SubTab } from './parts/SubTab';
 import {
     fetchRoadmapDraft,
     submitRoadmapDraft,
@@ -37,6 +38,9 @@ const AtriumRoadmap = () => {
     const [draftId, setDraftId] = useState(null);
     const [draft, setDraft] = useState(EMPTY_DRAFT);
     const [submitting, setSubmitting] = useState(false);
+    // Mobile-only: which pane is visible — 'left' = draft, 'right' = chat.
+    // Desktop ignores this since both panes are shown side-by-side.
+    const [mobilePane, setMobilePane] = useState('left');
 
     // Streamline handler — fired automatically when the planner emits a
     // [[CALL:propose_roadmap]]…[[/CALL]] block. Updates both local state and
@@ -131,7 +135,14 @@ const AtriumRoadmap = () => {
                 </div>
             </header>
 
-            <div className="roadmap">
+            <SubTab
+                left="Draft"
+                right="Tutor chat"
+                active={mobilePane}
+                onChange={setMobilePane}
+            />
+
+            <div className="roadmap" data-pane={mobilePane}>
                 {/* Proposed roadmap — editable */}
                 <aside className="rmap">
                     <div className="rmap-head">

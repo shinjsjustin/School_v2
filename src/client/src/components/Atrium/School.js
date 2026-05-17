@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { HeaderSchool } from './parts/Headers';
+import { SubTab } from './parts/SubTab';
 import { TopicDot } from './parts/Folder';
 import { fetchSchool, generateTest } from './data/api';
 import '../Styling/Atrium.css';
@@ -16,6 +17,8 @@ const AtriumSchool = () => {
     const [school, setSchool] = useState(null);
     // Per-section AI generation state: { [sectionId]: 'idle' | 'generating' | 'error' }
     const [genState, setGenState] = useState({});
+    // Mobile-only: 'left' = course outline, 'right' = sections grid.
+    const [mobilePane, setMobilePane] = useState('left');
 
     useEffect(() => {
         let cancelled = false;
@@ -60,7 +63,13 @@ const AtriumSchool = () => {
     return (
         <div className="atrium-screen">
             <HeaderSchool schoolName={school.name} progress={school.progress} />
-            <div className="school">
+            <SubTab
+                left="Outline"
+                right="Sections"
+                active={mobilePane}
+                onChange={setMobilePane}
+            />
+            <div className="school" data-pane={mobilePane}>
                 <aside className="school-side">
                     <div className="tag">Course folder</div>
                     <h2 className="school-title">

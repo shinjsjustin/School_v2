@@ -1323,3 +1323,420 @@
   color: var(--accent);
   text-align: center;
 }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   SubTab — mobile-only swap control for split-pane pages
+   (Roadmap, School, Teacher, Test). Hidden on desktop; activated inside the
+   mobile media block below.
+   ──────────────────────────────────────────────────────────────────────────── */
+.atrium-screen .subtab { display: none; }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Mobile (≤768px) — reflows Dashboard and School into the mobile design.
+   Desktop markup is untouched; layout & sizing are restyled via media queries
+   to match the reference designs (folder pills, stacked panes, etc.).
+   ──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* ── Header ───────────────────────────────────────────────────────────── */
+  .atrium-screen .hdr {
+    height: auto;
+    min-height: 56px;
+    padding: 10px 14px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .atrium-screen .hdr-left { gap: 10px; flex: 0 0 auto; }
+  .atrium-screen .hdr-center {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    gap: 8px;
+    min-width: 0;
+  }
+  .atrium-screen .hdr-right { gap: 8px; flex: 0 0 auto; }
+  /* Hide the wide "Welcome back, …" line on mobile — the dashboard greeting
+     below the header already carries that copy. */
+  .atrium-screen .hdr-welcome { display: none; }
+  .atrium-screen .hdr-brand { font-size: 15px; }
+  .atrium-screen .hdr-mono { width: 28px; height: 28px; font-size: 14px; }
+  /* Crumb: keep label+title but allow truncation. */
+  .atrium-screen .hdr-crumb { gap: 6px; }
+  .atrium-screen .hdr-crumb .label { font-size: 10px; letter-spacing: 0.1em; }
+  .atrium-screen .hdr-crumb .title { font-size: 15px; max-width: 42vw; }
+  .atrium-screen .hdr-crumb .sep { display: none; }
+  /* Tighten the avatar/logout cluster. */
+  .atrium-screen .hdr-avatar { width: 28px; height: 28px; font-size: 11px; }
+  /* Date pill is noisy on mobile — drop it. */
+  .atrium-screen .hdr-right > .tick { display: none; }
+
+  /* ── Dashboard ─────────────────────────────────────────────────────────── */
+  .atrium-screen .dash {
+    padding: 16px 14px 28px;
+    gap: 18px;
+  }
+  .atrium-screen .dash-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .atrium-screen .dash-title {
+    font-size: 30px;
+    line-height: 1.05;
+    margin: 6px 0 4px;
+  }
+  .atrium-screen .dash-sub { font-size: 12px; }
+  /* Stats become a 3-col bordered card (per mobile reference). */
+  .atrium-screen .dash-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .atrium-screen .dash-stat {
+    padding: 12px;
+    border-left: 1px solid var(--rule);
+  }
+  .atrium-screen .dash-stat:first-child { padding-left: 12px; }
+  .atrium-screen .dash-stat-num { font-size: 20px; }
+  .atrium-screen .dash-stat-num span { font-size: 12px; }
+  .atrium-screen .dash-stat-lbl { font-size: 9.5px; margin-top: 6px; }
+
+  /* Folder grid → single column of horizontal "folder pills". */
+  .atrium-screen .folder-grid {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+    row-gap: 10px;
+  }
+  .atrium-screen .folder-wrap {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .atrium-screen .folder {
+    width: 56px;
+    aspect-ratio: 200 / 150;
+    filter: drop-shadow(0 2px 4px var(--folder-shadow));
+  }
+  /* Disable the lid-spin hover on touch — hover hints don't apply. */
+  .atrium-screen .folder-wrap:hover .folder { transform: none; }
+  .atrium-screen .folder-wrap:hover .folder-lid { animation: none; }
+  .atrium-screen .folder-meta { gap: 4px; min-width: 0; }
+  .atrium-screen .folder-name {
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Chevron-like affordance using the existing progress row — keep ring
+     hidden on the pill (it's redundant with the bar) and add a trailing
+     ›-shaped indicator via CSS. */
+  .atrium-screen .folder-prog { gap: 8px; }
+  .atrium-screen .folder-prog .ring { display: none; }
+  .atrium-screen .folder-prog-num { font-size: 10px; min-width: 26px; order: 2; }
+  .atrium-screen .folder-prog-bar { order: 1; height: 3px; }
+  .atrium-screen .folder-wrap::after {
+    content: '›';
+    grid-column: 3;
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--ink-4);
+    line-height: 1;
+    padding-right: 4px;
+  }
+  /* "New school" tile keeps the dashed look but lays out as a pill too. */
+  .atrium-screen .new-folder {
+    border-style: dashed;
+    border-color: var(--rule-2);
+    background: transparent;
+    box-shadow: none;
+  }
+  .atrium-screen .new-folder .folder { filter: none; opacity: 0.7; }
+
+  /* ── School page ───────────────────────────────────────────────────────── */
+  .atrium-screen .school {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 16px 14px 28px;
+  }
+  .atrium-screen .school-side {
+    padding: 14px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+  }
+  .atrium-screen .school-title {
+    font-size: 22px;
+    margin: 6px 0 14px;
+  }
+  .atrium-screen .school-meta-row { font-size: 12px; padding: 8px 0; }
+  .atrium-screen .school-main { gap: 12px; }
+  .atrium-screen .section { padding: 14px 14px 16px; }
+  /* Section header: title row on top, progress + action buttons below so
+     long names + "Generate test" both fit on a narrow viewport. */
+  .atrium-screen .section-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .atrium-screen .section-head-l { gap: 10px; }
+  .atrium-screen .section-name { font-size: 16px; line-height: 1.25; }
+  .atrium-screen .section-head-r {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .atrium-screen .section-bar { flex: 1 1 80px; width: auto; min-width: 80px; }
+  .atrium-screen .section-pct { min-width: 30px; }
+  .atrium-screen .section-head-r .btn.test { flex: 1 1 auto; justify-content: center; }
+  /* Topics stack vertically on mobile — the row layout truncates names too
+     aggressively at narrow widths. */
+  .atrium-screen .topic-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .atrium-screen .topic {
+    flex: 1 1 auto;
+    width: 100%;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .atrium-screen .topic:last-child { border-bottom: none; }
+  .atrium-screen .topic-label { white-space: normal; }
+
+  /* ── SubTab control (mobile only) ─────────────────────────────────────── */
+  .atrium-screen .subtab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    flex: 0 0 auto;
+  }
+  .atrium-screen .subtab-arrow {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    color: var(--ink-3);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .atrium-screen .subtab-arrow.is-active {
+    color: var(--ink);
+    border-color: var(--ink-3);
+  }
+  .atrium-screen .subtab-arrow:hover { background: var(--bg-2); color: var(--ink); }
+  .atrium-screen .subtab-seg {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+  .atrium-screen .subtab-pill {
+    border: 0;
+    background: transparent;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    padding: 6px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    text-align: center;
+    transition: color .15s;
+    white-space: nowrap;
+  }
+  .atrium-screen .subtab-pill.on {
+    color: var(--bg);
+    background: var(--ink);
+  }
+  .atrium-screen .subtab-divider {
+    width: 1px;
+    background: var(--rule);
+    margin: 4px 0;
+  }
+  /* Hide the divider when one pill is active (it overlaps the dark pill). */
+  .atrium-screen .subtab-seg:has(.subtab-pill.on) .subtab-divider { background: transparent; }
+
+  /* ── Split-pane pages: show only the active pane on mobile ────────────── */
+  .atrium-screen .roadmap[data-pane="right"] > .rmap,
+  .atrium-screen .school[data-pane="right"]  > .school-side,
+  .atrium-screen .teach[data-pane="right"]   > .lo,
+  .atrium-screen .test[data-pane="right"]    > .qlist { display: none; }
+
+  .atrium-screen .roadmap[data-pane="left"] > .chat,
+  .atrium-screen .school[data-pane="left"]  > .school-main,
+  .atrium-screen .teach[data-pane="left"]   > .chat,
+  .atrium-screen .test[data-pane="left"]    > .qmain  { display: none; }
+
+  /* The visible pane no longer needs the divider line that previously
+     separated it from the (now hidden) stacked pane. */
+  .atrium-screen .roadmap > .rmap,
+  .atrium-screen .school  > .school-side,
+  .atrium-screen .teach   > .lo,
+  .atrium-screen .test    > .qlist { border-bottom: none; }
+
+  /* When the question list owns the full viewport on mobile, drop the
+     38vh cap so the user can scroll the full list. */
+  .atrium-screen .test[data-pane="left"] > .qlist { max-height: none; }
+
+  /* ── Roadmap page ──────────────────────────────────────────────────────── */
+  .atrium-screen .roadmap-hdr { gap: 8px; }
+  .atrium-screen .roadmap-title { font-size: 16px; }
+  /* The "Draft · Step 02 / 02" tick is noise on mobile. */
+  .atrium-screen .roadmap-hdr .hdr-right .tick { display: inline; font-size: 9.5px; }
+  .atrium-screen .roadmap {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .atrium-screen .rmap { border-right: none; }
+  .atrium-screen .rmap-head { padding: 14px 14px 10px; }
+  .atrium-screen .rmap-body { padding: 12px 14px; }
+  .atrium-screen .rmap-school { padding: 10px 12px 12px; margin-bottom: 12px; }
+  .atrium-screen .rmap-school-name { font-size: 17px; }
+  .atrium-screen .rmap-school-sub { font-size: 12.5px; }
+  .atrium-screen .rmap-sections { gap: 10px; }
+  .atrium-screen .rmap-section { padding: 10px 12px; }
+  .atrium-screen .rmap-section-name { font-size: 14px; }
+  .atrium-screen .rmap-topic-text { font-size: 13px; }
+  /* On touch, always show the × buttons since hover doesn't apply reliably. */
+  .atrium-screen .rmap-section .rmap-x,
+  .atrium-screen .rmap-topic .rmap-x { opacity: 1; }
+  .atrium-screen .rmap-foot { padding: 12px 14px 16px; }
+  .atrium-screen .rmap-submit { padding: 11px 14px; font-size: 13.5px; }
+
+  /* ── Teacher / Chat ────────────────────────────────────────────────────── */
+  .atrium-screen .teach {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .atrium-screen .lo {
+    padding: 16px 14px;
+    border-right: none;
+  }
+  .atrium-screen .lo-title { font-size: 17px; margin: 6px 0 14px; }
+  .atrium-screen .lo-list { gap: 10px; }
+  .atrium-screen .lo-item { font-size: 13px; }
+  .atrium-screen .lo-foot { padding-top: 14px; }
+
+  /* Chat region — now fills the viewport when active. */
+  .atrium-screen .chat { min-height: 0; flex: 1 1 auto; }
+  .atrium-screen .chat-head {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .atrium-screen .chat-tutor-name { font-size: 14px; }
+  .atrium-screen .chat-actions { flex-wrap: wrap; }
+  .atrium-screen .chat-body {
+    padding: 14px 14px 12px;
+    gap: 12px;
+  }
+  .atrium-screen .msg { max-width: 92%; }
+  .atrium-screen .msg-bubble { font-size: 13.5px; padding: 10px 13px; }
+  .atrium-screen .chat-input { padding: 10px 14px 14px; }
+  .atrium-screen .chat-input-bar { padding: 10px 12px 8px; border-radius: 12px; }
+  .atrium-screen .chat-input-tools { flex-wrap: wrap; gap: 4px; }
+  /* Start / Resume / Done overlay cards shrink for narrow viewports. */
+  .atrium-screen .chat-start-overlay { padding: 14px; }
+  .atrium-screen .chat-start-card { padding: 20px 18px 18px; }
+  .atrium-screen .chat-start-title { font-size: 18px; margin: 6px 0 8px; }
+  .atrium-screen .chat-start-sub { font-size: 12.5px; margin: 0 0 14px; }
+
+  /* ── Test page ─────────────────────────────────────────────────────────── */
+  .atrium-screen .test {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .atrium-screen .qlist {
+    border-right: none;
+    padding: 14px 14px;
+    /* Capped by default so on landscape phones the list doesn't dominate;
+       overridden above when this is the only visible pane. */
+    max-height: 60vh;
+  }
+  .atrium-screen .qlist-list { font-size: 12px; }
+  .atrium-screen .qrow { padding: 9px 4px; gap: 8px; }
+  .atrium-screen .qrow-stem { -webkit-line-clamp: 2; font-size: 12.5px; }
+  .atrium-screen .qlegend {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  /* Question module — stack hint below body; remove the 240px aside col. */
+  .atrium-screen .qmain {
+    padding: 16px 14px 20px;
+    gap: 14px;
+  }
+  .atrium-screen .qcard {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px 16px;
+  }
+  .atrium-screen .qcard-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+  .atrium-screen .qstem { font-size: 19px; max-width: none; }
+  .atrium-screen .qfr { min-height: 140px; font-size: 14px; padding: 12px 14px; }
+  .atrium-screen .qcard-aside { padding: 12px 14px; }
+  .atrium-screen .qcard-aside p { font-size: 12.5px; }
+
+  /* Nav row: arrows + dots on a wrap-friendly row, primary CTA full-width. */
+  .atrium-screen .qnav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .atrium-screen .qnav-l {
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .atrium-screen .qarrow { width: 36px; height: 36px; border-radius: 8px; }
+  .atrium-screen .qnav-dots { flex-wrap: wrap; gap: 5px; margin-left: 0; }
+  .atrium-screen .qnav-r {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .atrium-screen .qnav-r .btn { justify-content: center; }
+
+  /* Grader banner stacks on mobile. */
+  .atrium-screen .grade-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin: 14px 14px 0;
+  }
+  .atrium-screen .grade-banner-l { flex-direction: row; align-items: baseline; gap: 10px; }
+  .atrium-screen .grade-score { font-size: 26px; }
+  .atrium-screen .grade-banner .btn { align-self: stretch; justify-content: center; }
+}
+
+

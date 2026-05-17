@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { HeaderTest } from './parts/Headers';
+import { SubTab } from './parts/SubTab';
 import { Chevron } from './parts/Icons';
 import {
     fetchTest,
@@ -39,6 +40,8 @@ const AtriumTest = () => {
     const [response, setResponse] = useState('');
     const [savedAgo, setSavedAgo] = useState(0);
     const [submitting, setSubmitting] = useState(false);
+    // Mobile-only: 'left' = question list, 'right' = current question.
+    const [mobilePane, setMobilePane] = useState('right');
     const debounceRef = useRef(null);
 
     const applyPayload = (data) => {
@@ -135,6 +138,8 @@ const AtriumTest = () => {
 
     const goTo = async (num) => {
         if (num < 1 || num > test.total) return;
+        // On mobile, opening a question from the list flips to the question pane.
+        setMobilePane('right');
         if (!readOnly) await setCurrentQuestion(schoolId, sectionId, num);
         const r = await fetchTest(schoolId, sectionId);
         if (r.ok && r.data && r.data.status === 'ready') applyPayload(r.data);
@@ -185,7 +190,14 @@ const AtriumTest = () => {
                 </div>
             )}
 
-            <div className="test">
+            <SubTab
+                left="Questions"
+                right="Current"
+                active={mobilePane}
+                onChange={setMobilePane}
+            />
+
+            <div className="test" data-pane={mobilePane}>
                 {/* Question list */}
                 <aside className="qlist">
                     <div className="qlist-head">
