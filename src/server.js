@@ -1,6 +1,9 @@
+
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
 const path = require('path');
 const session = require('express-session');
 const cors = require('cors');
@@ -11,8 +14,6 @@ const chatRoutes = require('./routes/chat');
 const atriumRoutes = require('./routes/atrium');
 
 const isAuth = require('./middleware/isAuth');
-
-dotenv.config();
 
 const app = express();
 
