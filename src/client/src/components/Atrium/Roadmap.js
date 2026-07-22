@@ -9,6 +9,7 @@ import {
     roadmapStreamUrl,
 } from './data/api';
 import { useChatStream } from '../ChatRoom/useChatStream';
+import MarkdownMessage from '../ChatRoom/MarkdownMessage';
 import '../Styling/Atrium.css';
 
 // Map a server-shaped chat row ({ who, text }) into the hook's role/content
@@ -232,7 +233,7 @@ const AtriumRoadmap = () => {
                                 <div key={i} className={`msg msg-${who}`}>
                                     {who === 'tutor' && <div className="msg-av">M</div>}
                                     <div className="msg-bubble">
-                                        <p>{m.content}</p>
+                                        <MarkdownMessage content={m.content} />
                                         {m.pin_label && (
                                             <div className="msg-pin">
                                                 <span className="tick">↖ Proposed</span>

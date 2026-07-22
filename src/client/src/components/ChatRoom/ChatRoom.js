@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useChatStream } from './useChatStream';
+import MarkdownMessage from './MarkdownMessage';
 import '../Styling/ChatRoom.css';
 
 // Standalone chat page. Uses the shared streaming hook so behaviour stays in
@@ -38,7 +39,7 @@ const ChatRoom = () => {
                         key={idx}
                         className={`chatroom-bubble chatroom-bubble--${msg.role}${msg.streaming ? ' chatroom-bubble--streaming' : ''}`}
                     >
-                        {msg.content}
+                        <MarkdownMessage content={msg.content} />
                     </div>
                 ))}
                 <div ref={messagesEndRef} />

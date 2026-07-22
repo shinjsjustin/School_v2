@@ -5,6 +5,7 @@ import { SubTab } from './parts/SubTab';
 import { Check } from './parts/Icons';
 import { fetchTopic, teacherStreamUrl, teacherObjectivesGenerateUrl, teacherEndSessionUrl, teacherHintUrl, updateObjective, addTopicNote } from './data/api';
 import { useChatStream } from '../ChatRoom/useChatStream';
+import MarkdownMessage from '../ChatRoom/MarkdownMessage';
 import '../Styling/Atrium.css';
 
 // Server chat row → hook role/content shape.
@@ -383,7 +384,7 @@ const AtriumTeacher = () => {
                                 <div key={i} className={`msg msg-${who}`}>
                                     {who === 'tutor' && <div className="msg-av">M</div>}
                                     <div className="msg-bubble">
-                                        <p>{m.content}</p>
+                                        <MarkdownMessage content={m.content} />
                                     </div>
                                 </div>
                             );
